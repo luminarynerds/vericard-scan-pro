@@ -1,6 +1,8 @@
 // COST: $0.0001/scan (TensorFlow.js local processing)
 import * as tf from '@tensorflow/tfjs';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import { cardIdentificationService, CardDetails } from './CardIdentificationService';
+import { marketDataService } from './MarketDataService';
 
 export interface ScanResult {
   confidence: number;
@@ -122,6 +124,106 @@ export class AIService {
     }
     
     return localResult;
+  }
+
+  async processCard(captures: Record<string, string>): Promise<{
+    grade: number;
+    confidence: number;
+    damages?: Array<{type: string; severity: string; location: string}>;
+    authentic: boolean;
+    estimatedValue?: number;
+    cardDetails?: CardDetails;
+    captures?: Record<string, string>;
+  }> {
+    // Convert base64 images to ImageData and analyze each
+    const frontImage = captures['front'];
+    if (!frontImage) {
+      throw new Error('Front image capture is required');
+    }
+
+    // Convert base64 to ImageData
+    const imageData = await this.base64ToImageData(frontImage);
+    
+    // Analyze the front image (most important for card identification)
+    const scanResult = await this.analyzeCard(imageData);
+    
+    // Identify the card using the dedicated service
+    const cardDetails = await cardIdentificationService.identifyCard(captures);
+    
+    // Convert damage analysis to expected format
+    const damages = [];
+    if (scanResult.damageAnalysis) {
+      if (scanResult.damageAnalysis.hasScratches) {
+        damages.push({ type: 'Scratch', severity: 'Minor', location: 'Surface' });
+      }
+      if (scanResult.damageAnalysis.hasCornerWear) {
+        damages.push({ type: 'Corner Wear', severity: 'Moderate', location: 'Corners' });
+      }
+      if (scanResult.damageAnalysis.hasEdgeDamage) {
+        damages.push({ type: 'Edge Damage', severity: 'Minor', location: 'Edges' });
+      }
+    }
+    
+    // Get real market data for accurate pricing
+    const grade = scanResult.damageAnalysis?.overallGrade || 7;
+    const marketData = await marketDataService.getMarketData(cardDetails, grade);
+    const estimatedValue = marketData.averagePrice || 0;
+    
+    return {
+      grade: scanResult.damageAnalysis?.overallGrade || 7,
+      confidence: Math.round(scanResult.confidence * 100),
+      damages: damages.length > 0 ? damages : undefined,
+      authentic: scanResult.confidence > 0.7, // Simple threshold for demo
+      estimatedValue,
+      cardDetails,
+      captures // Include the original images for display
+    };
+  }
+
+  private async base64ToImageData(base64: string): Promise<ImageData> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        resolve(ctx.getImageData(0, 0, img.width, img.height));
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = base64;
+    });
+  }
+
+  private calculateEstimatedValue(grade: number): number {
+    // Mock calculation - in production would query market data
+    const baseValues: Record<number, number> = {
+      10: 1000,
+      9: 500,
+      8: 200,
+      7: 100,
+      6: 50,
+      5: 25
+    };
+    return baseValues[grade] || 10;
+  }
+
+  private getGradeMultiplier(grade: number): number {
+    // Multipliers based on condition grade
+    const multipliers: Record<number, number> = {
+      10: 5.0,    // Gem Mint
+      9: 2.5,     // Mint
+      8: 1.5,     // Near Mint-Mint
+      7: 1.0,     // Near Mint
+      6: 0.5,     // Excellent-Mint
+      5: 0.25     // Excellent
+    };
+    return multipliers[grade] || 0.1;
   }
 
   // Memory management

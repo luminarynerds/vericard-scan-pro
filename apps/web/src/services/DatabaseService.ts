@@ -43,7 +43,8 @@ export class DatabaseService {
 
   static async saveScan(scan: Omit<Scan, 'id'>): Promise<number> {
     await this.init()
-    return await this.db.scans.add(scan)
+    const id = await this.db.scans.add(scan)
+    return id as number
   }
 
   static async getScan(id: number): Promise<Scan | undefined> {
@@ -67,7 +68,8 @@ export class DatabaseService {
 
   static async createTransaction(transaction: Omit<Transaction, 'id'>): Promise<number> {
     await this.init()
-    return await this.db.transactions.add(transaction)
+    const id = await this.db.transactions.add(transaction)
+    return id as number
   }
 
   static async freezeTransaction(transactionId: number, reason: string): Promise<void> {

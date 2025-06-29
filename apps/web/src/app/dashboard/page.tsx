@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Camera, TrendingUp, Shield, Clock, ChevronRight } from 'lucide-react'
 import { DatabaseService } from '@/services/DatabaseService'
+import { SubscriptionService } from '@/services/SubscriptionService'
 
 interface DashboardStats {
   totalScans: number
@@ -12,7 +14,7 @@ interface DashboardStats {
   avgProcessingTime: number
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const [stats, setStats] = useState<DashboardStats>({
     totalScans: 0,
     recentScans: [],
@@ -20,10 +22,18 @@ export default function DashboardPage() {
     avgProcessingTime: 0.76
   })
   const [loading, setLoading] = useState(true)
+  const searchParams = useSearchParams()
 
   useEffect(() => {
+    // Check for Stripe success
+    if (searchParams.get('success') === 'true') {
+      // In production, verify with backend and get subscription details
+      alert('Payment successful! Your Pro features are now active.')
+      // For demo, just upgrade to Pro with 30-day expiration
+      SubscriptionService.upgradeToPro(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    }
     loadDashboardData()
-  }, [])
+  }, [searchParams])
 
   const loadDashboardData = async () => {
     try {
@@ -207,5 +217,13 @@ function QuickAction({ title, description, href, icon }: {
       <h3 className="font-semibold mb-2 group-hover:text-primary transition">{title}</h3>
       <p className="text-sm text-gray-400">{description}</p>
     </Link>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-900" />}>
+      <DashboardContent />
+    </Suspense>
   )
 }

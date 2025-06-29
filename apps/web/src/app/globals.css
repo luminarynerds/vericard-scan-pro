@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '../styles/scanner-animations.css';
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -18,17 +20,4 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-}
-
-.scan-line {
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #6366F1, transparent);
-  animation: scan 2s ease-in-out infinite;
-}
-
-@keyframes scan {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(100vh); }
 }

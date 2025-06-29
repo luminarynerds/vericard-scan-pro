@@ -33,5 +33,9 @@
     "card-verification",
     "tensorflow",
     "web-app"
-  ]
+  ],
+  "dependencies": {
+    "@types/uuid": "^10.0.0",
+    "uuid": "^11.1.0"
+  }
 }
