@@ -21,16 +21,10 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": ".",
-    "paths": {
-      "@vericard/core/*": ["libs/core/src/*"],
-      "@vericard/ai/*": ["libs/ai/src/*"]
-    }
+    "paths": {}
   },
   "exclude": ["node_modules", "dist", "build", "coverage"],
   "references": [
-    { "path": "./apps/web" },
-    { "path": "./apps/api" },
-    { "path": "./libs/core" },
-    { "path": "./libs/ai" }
+    { "path": "./apps/web" }
   ]
 }

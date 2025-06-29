@@ -4,36 +4,17 @@
   "description": "Enterprise-grade card verification and scanning platform - Local-first architecture",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "libs/*"
+    "apps/*"
   ],
   "scripts": {
-    "dev": "pnpm --parallel --filter './apps/*' run dev",
-    "build": "pnpm --filter './apps/*' run build",
-    "test": "pnpm run test:unit && pnpm run test:e2e",
-    "test:unit": "pnpm --parallel --filter './apps/*' --filter './libs/*' run test",
-    "test:e2e": "pnpm --filter './apps/*' run test:e2e",
-    "lint": "pnpm --parallel --filter './apps/*' --filter './libs/*' run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "validate:rules": "ts-node scripts/validate-rules.ts",
-    "validate:module": "ts-node scripts/validate-module.ts",
-    "benchmark": "ts-node scripts/benchmark.ts",
-    "setup": "bash scripts/setup.sh",
-    "docker:dev": "docker-compose -f infra/docker-compose.yml -f infra/docker-compose.dev.yml up",
-    "docker:prod": "docker-compose -f infra/docker-compose.yml -f infra/docker-compose.prod.yml up",
-    "db:migrate": "cd apps/api && npm run db:migrate",
-    "db:seed": "cd apps/api && npm run db:seed",
-    "coverage": "pnpm --parallel --filter './apps/*' --filter './libs/*' run coverage",
-    "coverage:report": "pnpm run coverage && node scripts/coverage-report.js"
+    "dev": "cd apps/web && npm run dev",
+    "build": "cd apps/web && npm run build",
+    "test": "cd apps/web && npm test",
+    "lint": "cd apps/web && npm run lint",
+    "validate": "ts-node scripts/validate-rules.ts"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
-    "@typescript-eslint/eslint-plugin": "^6.19.0",
-    "@typescript-eslint/parser": "^6.19.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.1.3",
-    "prettier": "^3.2.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   },
@@ -50,9 +31,7 @@
   "license": "MIT",
   "keywords": [
     "card-verification",
-    "local-first",
-    "blockchain",
-    "web-app",
-    "monorepo"
+    "tensorflow",
+    "web-app"
   ]
 }
