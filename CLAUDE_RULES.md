@@ -20,18 +20,18 @@ graph LR
    - 85% minimum coverage before merge  
 2. **Cost-Annotated Code**  
    ```typescript  
-   // COST: $0.0001/scan (Gemini Nano)  
+   // COST: $0.0001/scan (TensorFlow.js)  
    function localCardScan() {...}  
    ```  
 3. **Hybrid-First Architecture**  
-   - Device: Gemini Nano  
-   - Cloud: YOLOv8 (DigitalOcean)  
+   - Browser: TensorFlow.js  
+   - Cloud: REST API (DigitalOcean)  
    - Fallback: Manual UI  
 
 ## 🚨 SECURITY REQUIREMENTS  
-1. Blockchain audit trails for all scans  
-2. End-to-end encryption (libsodium)  
-3. Jailbreak detection → Auto-wipe  
+1. IndexedDB encryption for local storage  
+2. HTTPS required for all API calls  
+3. Browser security best practices  
 
 ## 💰 ECONOMIC CONSTRAINTS  
 | Component | Max Cost |  
@@ -53,27 +53,27 @@ graph LR
 ## 🧩 ARCHITECTURE BLUEPRINTS  
 ```mermaid  
 graph TB  
-    A[iPad] --> B(Gemini Nano)  
-    B -->|Low Confidence| C[YOLOv8 Cloud]  
+    A[Browser] --> B(TensorFlow.js)  
+    B -->|Low Confidence| C[Cloud API]  
     B -->|High Confidence| D[Local Result]  
     C --> E[Hybrid Consolidation]  
-    E --> F[Blockchain Seal]  
+    E --> F[IndexedDB Storage]  
 ```
 
 ## 📋 MODULE REQUIREMENTS  
 ### 1. CAMERA SYSTEM  
-- **Must use:** react-native-vision-camera  
-- **Prohibited:** Expo Camera (insufficient control)  
-- **UV Simulation:** OpenCV-based filter  
+- **Must use:** react-webcam for web  
+- **Required:** HTTPS for camera access  
+- **UV Simulation:** Canvas-based filter  
 - **Glare Threshold:** 85% luminosity → force rescan  
 
 ### 2. AI ORCHESTRATION  
 ```typescript  
 // REQUIRED IMPLEMENTATION  
-const processCard = (image) => {  
-  const localResult = geminiNano.analyze(image);  
+const processCard = async (image: ImageData) => {  
+  const localResult = await tensorflowModel.analyze(image);  
   if (localResult.confidence < 0.85 || cardValue > 100) {  
-    return cloudYOLOv8.analyze(image);  
+    return cloudAPI.analyze(image);  
   }  
   return localResult;  
 }  

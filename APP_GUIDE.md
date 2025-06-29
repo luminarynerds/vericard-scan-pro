@@ -1,32 +1,33 @@
-# VeriCard Scan Pro - App Guide
+# VeriCard Scan Pro - Web App Guide
 
 ## 🚀 First Launch
 
-When you first launch the app, you'll see:
+When you first open the web app at [http://localhost:3000](http://localhost:3000), you'll see:
 
 ### Home Screen
 - **Scan Card** button - Main feature to scan trading cards
-- **Recent Scans** - Shows your scan history
+- **Recent Scans** - Shows your scan history (stored locally)
 - **Quick Stats** - Total scans, accuracy rate, saved reports
 
-### Bottom Navigation
+### Navigation Menu
 - 🏠 **Home** - Main dashboard
 - 📷 **Scanner** - Camera scanning interface  
-- 📊 **Reports** - Generated PSA/eBay reports
+- 📊 **Dashboard** - Analytics and reports
 - 💳 **Subscription** - Manage your plan
 - ⚙️ **Settings** - App configuration
 
-## 📱 Core Features
+## 🌐 Core Features
 
 ### 1. Card Scanning Flow
-1. Tap **Scan Card** or Scanner tab
-2. Position card in frame
-3. App will guide you through:
+1. Click **Scan Card** or Scanner link
+2. Allow camera permissions when prompted
+3. Position card in frame
+4. App will guide you through:
    - Front capture
    - Back capture  
    - Edge captures (4 angles)
-4. UV filter simulation activates automatically
-5. AI processes images in <0.8 seconds
+5. Canvas-based UV filter simulation
+6. TensorFlow.js processes images in <1 second
 
 ### 2. Damage Detection
 The AI will detect:
@@ -52,12 +53,12 @@ From scan results, generate:
 - **Insurance Report** - For high-value cards
 - **Topps Authentication** - For modern cards
 
-### 5. Theft Prevention
-If suspicious activity detected:
-- Transaction auto-freezes
-- 48-hour verification period
-- Notification sent
-- Blockchain audit trail created
+### 5. Local-First Storage
+All data stored locally using:
+- IndexedDB via Dexie.js
+- No cloud sync required
+- Export/import capabilities
+- Privacy by default
 
 ## 💰 Subscription Tiers
 
@@ -75,26 +76,39 @@ If suspicious activity detected:
 ## 🔧 Settings
 
 ### Camera Settings
-- **Auto-UV** - Toggle UV filter
-- **Multi-Angle** - Enable/disable
-- **Flash Mode** - Auto/On/Off
+- **Resolution** - HD/4K options
+- **Auto-Capture** - Toggle automatic capture
+- **Guidelines** - Show/hide frame guides
 
 ### AI Settings
 - **Confidence Threshold** - Default 85%
-- **Local/Cloud** - Processing mode
+- **Processing Mode** - Local/Cloud hybrid
 - **Batch Mode** - For multiple cards
 
-### Security
-- **Biometric Lock** - Face/Touch ID
-- **Auto-Wipe** - After failed attempts
-- **Encryption** - Always on
+### Privacy & Security
+- **Local Storage** - All data stays on device
+- **Clear Data** - Remove all local data
+- **Export Data** - Download your data
+
+## 💻 Browser Requirements
+
+### Supported Browsers
+- Chrome 90+ (Recommended)
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+
+### Required Features
+- WebRTC for camera access
+- WebGL for TensorFlow.js
+- IndexedDB for storage
 
 ## 📞 Test Features
 
 Since we're in development mode:
 - Stripe payments use test cards
-- AI runs in simulation mode
-- Database is local only
+- AI runs with sample models
+- All data is local only
 - No real charges occur
 
 ### Test Credit Cards
@@ -105,22 +119,25 @@ Since we're in development mode:
 
 ## 🐛 Known Issues
 
-1. **Camera Permission** - Must allow on first launch
-2. **Storage Warning** - SQLite message (ignore)
-3. **Network Offline** - App works offline-first
+1. **Camera Permission** - HTTPS required (localhost works)
+2. **Mobile Browsers** - Limited support, desktop recommended
+3. **Storage Limits** - Browser may limit to 50MB
 
-## 📱 Gestures
+## 🖱️ Interface Tips
 
-- **Pinch** - Zoom scan preview
-- **Swipe** - Navigate between captures
-- **Long Press** - Quick actions menu
-- **Shake** - Report issues (dev mode)
+- **Click & Drag** - Adjust scan area
+- **Scroll** - Navigate between captures
+- **Right Click** - Quick actions menu
+- **Keyboard Shortcuts**:
+  - `Space` - Capture image
+  - `Enter` - Confirm scan
+  - `Esc` - Cancel operation
 
 ## 🎯 Pro Tips
 
 1. **Best Scanning**:
-   - Use natural light
-   - Avoid shadows
+   - Use good lighting
+   - Avoid reflections
    - Keep card flat
    - Clean camera lens
 
@@ -130,16 +147,33 @@ Since we're in development mode:
    - Export CSV reports
 
 3. **High-Value Cards**:
-   - Enable all security features
-   - Use maximum confidence
+   - Maximum resolution
+   - Multiple angles
    - Generate all reports
 
 ## 🆘 Troubleshooting
 
-**App Crashes**: Check camera permissions
-**Scan Fails**: Clean lens, better lighting
-**Login Issues**: App is local-only for now
-**Payment Fails**: Use test card numbers
+**Camera Not Working**: 
+- Check HTTPS/localhost
+- Allow camera permissions
+- Try different browser
+
+**Slow Performance**: 
+- Close other tabs
+- Check WebGL support
+- Clear browser cache
+
+**Storage Full**: 
+- Export old scans
+- Clear completed reports
+- Check browser storage quota
+
+## 🔐 Data Privacy
+
+- All processing happens in your browser
+- No data sent to servers unless you explicitly sync
+- You own and control all your scan data
+- Export anytime in standard formats
 
 ---
 
