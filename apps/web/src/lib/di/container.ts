@@ -36,19 +36,20 @@ export class DIContainer {
 
   /**
    * Register a class with automatic dependency resolution
+   * Note: Currently disabled due to reflect-metadata dependency
    */
-  registerClass<T>(token: string | symbol, constructor: Constructor<T>, singleton = false): void {
-    const factory = () => {
-      const paramTypes = Reflect.getMetadata('design:paramtypes', constructor) || []
-      const dependencies = paramTypes.map((type: any) => this.resolve(type))
-      return new constructor(...dependencies)
-    }
-    
-    this.registrations.set(token, {
-      factory,
-      singleton
-    })
-  }
+  // registerClass<T>(token: string | symbol, constructor: Constructor<T>, singleton = false): void {
+  //   const factory = () => {
+  //     const paramTypes = Reflect.getMetadata('design:paramtypes', constructor) || []
+  //     const dependencies = paramTypes.map((type: any) => this.resolve(type))
+  //     return new constructor(...dependencies)
+  //   }
+  //   
+  //   this.registrations.set(token, {
+  //     factory,
+  //     singleton
+  //   })
+  // }
 
   /**
    * Resolve a dependency
@@ -96,6 +97,7 @@ export const ServiceTokens = {
   
   // Repositories
   ScanRepository: Symbol('ScanRepository'),
+  TransactionRepository: Symbol('TransactionRepository'),
   CardRepository: Symbol('CardRepository'),
   MarketDataRepository: Symbol('MarketDataRepository'),
   UserRepository: Symbol('UserRepository'),
@@ -108,20 +110,22 @@ export const ServiceTokens = {
 } as const
 
 // Decorator for dependency injection
-export function Injectable(token?: string | symbol) {
-  return function (target: any) {
-    if (token) {
-      container.registerClass(token, target, true)
-    }
-    return target
-  }
-}
+// Note: Currently disabled since we removed @Injectable usage
+// export function Injectable(token?: string | symbol) {
+//   return function (target: any) {
+//     if (token) {
+//       container.registerClass(token, target, true)
+//     }
+//     return target
+//   }
+// }
 
 // Decorator for injecting dependencies
-export function Inject(token: string | symbol) {
-  return function (target: any, propertyKey: string | symbol, parameterIndex: number) {
-    const existingTokens = Reflect.getMetadata('custom:inject_tokens', target) || []
-    existingTokens[parameterIndex] = token
-    Reflect.defineMetadata('custom:inject_tokens', existingTokens, target)
-  }
-}
+// Note: Currently disabled due to reflect-metadata dependency
+// export function Inject(token: string | symbol) {
+//   return function (target: any, propertyKey: string | symbol, parameterIndex: number) {
+//     const existingTokens = Reflect.getMetadata('custom:inject_tokens', target) || []
+//     existingTokens[parameterIndex] = token
+//     Reflect.defineMetadata('custom:inject_tokens', existingTokens, target)
+//   }
+// }

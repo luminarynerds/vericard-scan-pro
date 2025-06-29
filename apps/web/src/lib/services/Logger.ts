@@ -3,7 +3,6 @@
  */
 
 import { ILogger } from '../interfaces/services'
-import { Injectable } from '../di/container'
 
 export enum LogLevel {
   DEBUG = 0,
@@ -161,7 +160,6 @@ export class RemoteTransport implements LogTransport {
   }
 }
 
-@Injectable()
 export class Logger implements ILogger {
   private transports: LogTransport[] = []
   private minLevel: LogLevel = LogLevel.INFO

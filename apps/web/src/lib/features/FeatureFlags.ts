@@ -2,7 +2,6 @@
  * Feature Flags - Sam: Gradual rollout and A/B testing
  */
 
-import { Injectable } from '../di/container'
 import { IConfigService, ILogger } from '../interfaces/services'
 
 export interface FeatureFlag {
@@ -147,7 +146,6 @@ export class RemoteFeatureFlagProvider implements FeatureFlagProvider {
   }
 }
 
-@Injectable()
 export class FeatureFlagService implements IConfigService {
   private provider: FeatureFlagProvider
   private cache: Map<string, FeatureFlag> = new Map()
@@ -312,7 +310,7 @@ export class FeatureFlagService implements IConfigService {
     await this.refreshCacheIfNeeded()
     
     const enabled: string[] = []
-    for (const [key, flag] of this.cache.entries()) {
+    for (const [key, flag] of Array.from(this.cache.entries())) {
       if (await this.getFeatureFlag(key)) {
         enabled.push(key)
       }

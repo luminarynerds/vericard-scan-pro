@@ -2,7 +2,6 @@
  * Card Database Manager - Rich Klein: Accurate, verifiable card data
  */
 
-import { Injectable } from '../di/container'
 import { ICardDatabaseService, ILogger, ICacheManager } from '../interfaces/services'
 import { CardDetails } from '@/services/CardIdentificationService'
 import { 
@@ -359,13 +358,12 @@ export class LocalDatabaseProvider implements ICardProvider {
       card.set.toLowerCase().includes(lowerQuery) ||
       card.manufacturer.toLowerCase().includes(lowerQuery) ||
       card.year.toString().includes(lowerQuery) ||
-      (card.cardNumber && card.cardNumber.includes(lowerQuery))
+      (card.cardNumber ? card.cardNumber.includes(lowerQuery) : false)
     )
   }
 }
 
 // Main Card Database Manager
-@Injectable()
 export class CardDatabaseManager implements ICardDatabaseService {
   private providers: ICardProvider[] = []
   private localProvider: LocalDatabaseProvider
@@ -503,7 +501,7 @@ export class CardDatabaseManager implements ICardDatabaseService {
     return {
       isValid,
       confidence,
-      issues: [...new Set(allIssues)], // Deduplicate
+      issues: Array.from(new Set(allIssues)), // Deduplicate
       suggestions
     }
   }

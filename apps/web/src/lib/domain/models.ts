@@ -130,7 +130,7 @@ export class Grade {
   }
 
   get label(): string {
-    return Grade.GRADE_LABELS[this.numeric] || 'Unknown'
+    return (Grade.GRADE_LABELS as any)[this.numeric] || 'Unknown'
   }
 
   get subgrades(): { centering: string; corners: number; edges: number; surface: number } {
@@ -171,7 +171,7 @@ export class DamageAssessment {
   }
 
   get damageTypes(): string[] {
-    return [...new Set(this.damages.map(d => d.type))]
+    return Array.from(new Set(this.damages.map(d => d.type)))
   }
 }
 

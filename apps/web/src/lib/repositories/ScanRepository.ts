@@ -16,7 +16,6 @@ import {
   CenteringScore,
   Damage
 } from '../domain/models'
-import { Injectable } from '../di/container'
 
 interface ScanRecord {
   id: string
@@ -31,7 +30,6 @@ interface ScanRecord {
   processingTime: number
 }
 
-@Injectable()
 export class ScanRepository implements IScanRepository {
   private db: Dexie
   private scans: Dexie.Table<ScanRecord, string>

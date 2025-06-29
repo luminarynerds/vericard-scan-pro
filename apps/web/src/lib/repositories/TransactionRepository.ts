@@ -4,7 +4,6 @@
 
 import Dexie from 'dexie'
 import { ITransactionRepository, Transaction, TransactionStatus } from '../interfaces/repositories'
-import { Injectable } from '../di/container'
 
 interface TransactionRecord {
   id: string
@@ -17,7 +16,6 @@ interface TransactionRecord {
   metadata?: Record<string, any>
 }
 
-@Injectable()
 export class TransactionRepository implements ITransactionRepository {
   private db: Dexie
   private transactions: Dexie.Table<TransactionRecord, string>

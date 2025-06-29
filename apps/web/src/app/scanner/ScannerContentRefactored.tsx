@@ -63,18 +63,22 @@ export function ScannerContentRefactored() {
 
   // Check feature flags
   useEffect(() => {
-    if (featureFlags) {
-      featureFlags.getFeatureFlag('multiAngleScanning').then(enabled => {
+    if (featureFlags && typeof featureFlags.getFeatureFlag === 'function') {
+      featureFlags.getFeatureFlag('multiAngleScanning').then((enabled: boolean) => {
         if (!enabled) {
           setSimpleMode(true)
         }
+      }).catch((error: Error) => {
+        console.warn('Failed to get feature flag:', error)
       })
     }
   }, [featureFlags])
 
   // Handle webcam errors
   const handleWebcamError = useCallback((error: string | DOMException) => {
-    logger?.error('Webcam error', new Error(error.toString()))
+    if (logger && typeof logger.error === 'function') {
+      logger.error('Webcam error', new Error(error.toString()))
+    }
     setError('Camera access failed. Please check permissions and try again.')
     setHasPermission(false)
   }, [logger])
@@ -124,10 +128,16 @@ export function ScannerContentRefactored() {
     
     try {
       // Process with AI service
+      if (!aiService || typeof aiService.processCard !== 'function') {
+        throw new Error('AI service not available')
+      }
       const result = await aiService.processCard(allCaptures)
       
       // Save scan to database
       try {
+        if (!databaseService || typeof databaseService.saveScan !== 'function') {
+          throw new Error('Database service not available')
+        }
         const scan = await databaseService.saveScan({
           captures: allCaptures,
           result,
@@ -146,7 +156,7 @@ export function ScannerContentRefactored() {
       setCurrentStep('complete')
       
       // Fetch market data if card was identified
-      if (result.cardDetails) {
+      if (result.cardDetails && marketDataService && typeof marketDataService.getMarketData === 'function') {
         try {
           const [mktData, popData] = await Promise.all([
             marketDataService.getMarketData(result.cardDetails, result.grade),

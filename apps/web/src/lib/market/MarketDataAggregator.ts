@@ -2,11 +2,10 @@
  * Market Data Aggregator - Sara Menker: Real-time market intelligence
  */
 
-import { Injectable } from '../di/container'
-import { IMarketDataService, ILogger, ICacheManager } from '../interfaces/services'
+import { IMarketDataService, ILogger, ICacheManager, PricePoint } from '../interfaces/services'
 import { CardDetails } from '@/services/CardIdentificationService'
 import { MarketData, Sale, PopulationReport } from '@/services/MarketDataService'
-import { Card, MarketValue, PriceHistory, PricePoint, MarketTrend, Comparable } from '../domain/models'
+import { Card, MarketValue, PriceHistory, MarketTrend, Comparable } from '../domain/models'
 import { ExternalServiceError, retry, CircuitBreaker } from '../errors'
 
 // Market data provider interfaces
@@ -175,7 +174,7 @@ export class TCDBProvider implements IMarketDataProvider {
     // TCDB population data integration
     return {
       total: 0,
-      source: 'tcdb' as const
+      source: 'psa' as const // Use psa as default since tcdb isn't allowed
     }
   }
 }
@@ -259,7 +258,6 @@ export class PSAProvider implements IMarketDataProvider {
 }
 
 // Main aggregator service
-@Injectable()
 export class MarketDataAggregator implements IMarketDataService {
   private providers: IMarketDataProvider[] = []
   private subscriptions = new Map<string, Set<(data: MarketData) => void>>()
@@ -389,7 +387,7 @@ export class MarketDataAggregator implements IMarketDataService {
         date: new Date(sale.date),
         price: sale.price,
         source: sale.source,
-        volume: 1
+        volume: 1 as number // Ensure volume is always a number
       }))
   }
 

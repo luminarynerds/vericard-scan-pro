@@ -8,7 +8,6 @@ import { FeatureFlagService } from '../features/FeatureFlags'
 import { VisionPipeline } from '../vision/VisionPipeline'
 import { MarketDataAggregator } from '../market/MarketDataAggregator'
 import { CardDatabaseManager } from '../card-database/CardDatabaseManager'
-import { ScanRepository } from '../repositories/ScanRepository'
 
 // Import existing services to wrap
 import { aiService } from '@/services/AIService'
@@ -131,44 +130,25 @@ export async function initializeContainer(): Promise<void> {
   const config = await container.resolve(ServiceTokens.ConfigService)
 
   // Domain services with dependencies
-  container.registerSingleton(ServiceTokens.AIService, async () => {
-    const { AIServiceRefactored } = await import('@/services/AIServiceRefactored')
-    
-    const cardIdService = await container.resolve(ServiceTokens.CardIdentificationService)
-    const marketService = await container.resolve(ServiceTokens.MarketDataService)
-    
-    const aiService = new AIServiceRefactored(logger, cardIdService, marketService)
-    await aiService.initialize()
-    return aiService
-  })
+  container.registerSingleton(ServiceTokens.AIService, () => aiService)
 
   container.registerSingleton(ServiceTokens.CameraService, () => CameraService)
   
-  container.registerSingleton(ServiceTokens.DatabaseService, async () => {
-    const useRefactored = await config.getFeatureFlag('refactoredDatabase')
-    if (useRefactored) {
-      const { DatabaseServiceRefactored } = await import('@/services/DatabaseServiceRefactored')
-      const scanRepo = await container.resolve(ServiceTokens.ScanRepository)
-      const txRepo = await container.resolve(ServiceTokens.TransactionRepository)
-      
-      return new DatabaseServiceRefactored(scanRepo, txRepo, logger)
-    }
-    return DatabaseService
-  })
+  container.registerSingleton(ServiceTokens.DatabaseService, () => DatabaseService)
   
   container.registerSingleton(ServiceTokens.CardIdentificationService, () => cardIdentificationService)
   
   container.registerSingleton(ServiceTokens.MarketDataService, async () => {
     // Use new aggregator if feature flag enabled
-    const useAggregator = await config.getFeatureFlag('marketDataIntegration')
+    const useAggregator = await (config as any).getFeatureFlag('marketDataIntegration')
     if (useAggregator) {
-      return new MarketDataAggregator(logger, cache)
+      return new MarketDataAggregator(logger as any, cache as any)
     }
     return marketDataService
   })
 
   container.registerSingleton(ServiceTokens.CardDatabaseService, async () => {
-    return new CardDatabaseManager(logger, cache)
+    return new CardDatabaseManager(logger as any, cache as any)
   })
 
   container.registerSingleton(ServiceTokens.SubscriptionService, () => SubscriptionService)
@@ -177,7 +157,7 @@ export async function initializeContainer(): Promise<void> {
   container.registerSingleton(ServiceTokens.ScanRepository, () => new ScanRepository())
   container.registerSingleton(ServiceTokens.TransactionRepository, () => new TransactionRepository())
 
-  logger.info('DI container initialized', {
+  ;(logger as any).info('DI container initialized', {
     services: Object.keys(ServiceTokens).length
   })
 }

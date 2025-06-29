@@ -103,7 +103,7 @@ export interface IConfigService {
   getRequired<T = any>(key: string): T
   isDevelopment(): boolean
   isProduction(): boolean
-  getFeatureFlag(flag: string): boolean
+  getFeatureFlag(flag: string): Promise<boolean>
 }
 
 // Types

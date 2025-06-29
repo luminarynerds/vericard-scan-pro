@@ -3,7 +3,6 @@
  */
 
 import * as tf from '@tensorflow/tfjs'
-import { Injectable } from '../di/container'
 import { ILogger } from '../interfaces/services'
 import { Card, CardAttributes } from '../domain/models'
 
@@ -80,7 +79,6 @@ export interface AuthenticityCheckResult {
   colorAccuracy: number
 }
 
-@Injectable()
 export class VisionPipeline {
   private models: Map<string, VisionModel> = new Map()
   private isInitialized = false
@@ -227,13 +225,14 @@ export class VisionPipeline {
         const tensor = input as tf.Tensor
         
         // Edge detection for corner/edge wear
-        const edges = tf.image.sobelEdges(tensor.expandDims(0) as tf.Tensor4D)
+        // Note: sobelEdges not available in current TensorFlow.js version
+        // const edges = tf.image.sobelEdges(tensor.expandDims(0) as tf.Tensor4D)
         
         // Surface analysis for scratches
-        const grayscale = tf.image.rgbToGrayscale(tensor)
+        const grayscale = tf.image.rgbToGrayscale(tensor as tf.Tensor3D)
         const variance = tf.moments(grayscale).variance
         
-        edges.dispose()
+        // edges.dispose()
         grayscale.dispose()
         
         return {
@@ -410,8 +409,9 @@ export class VisionPipeline {
       processed = tf.image.resizeBilinear(processed as tf.Tensor3D, [640, 480])
 
       // 2. Normalize brightness/contrast
-      processed = tf.image.adjustBrightness(processed, 0.1)
-      processed = tf.image.adjustContrast(processed, 1.2)
+      // Note: adjustBrightness and adjustContrast not available in current TensorFlow.js version
+      // processed = tf.image.adjustBrightness(processed, 0.1)
+      // processed = tf.image.adjustContrast(processed, 1.2)
 
       // 3. Denoise
       processed = tf.conv2d(

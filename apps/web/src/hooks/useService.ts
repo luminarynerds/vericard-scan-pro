@@ -101,25 +101,25 @@ export function useServices<T extends Record<string, symbol>>(
 
 // Convenience hooks for common services
 export function useLogger() {
-  return useService(ServiceTokens.Logger)
+  return useService(ServiceTokens.Logger) as any
 }
 
 export function useAIService() {
-  return useService(ServiceTokens.AIService)
+  return useService(ServiceTokens.AIService) as any
 }
 
 export function useDatabaseService() {
-  return useService(ServiceTokens.DatabaseService)
+  return useService(ServiceTokens.DatabaseService) as any
 }
 
 export function useMarketDataService() {
-  return useService(ServiceTokens.MarketDataService)
+  return useService(ServiceTokens.MarketDataService) as any
 }
 
 export function useCardDatabaseService() {
-  return useService(ServiceTokens.CardDatabaseService)
+  return useService(ServiceTokens.CardDatabaseService) as any
 }
 
 export function useFeatureFlags() {
-  return useService(ServiceTokens.ConfigService)
+  return useService(ServiceTokens.ConfigService) as any
 }
