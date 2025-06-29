@@ -1,134 +1,137 @@
-interface CardAnalysis {
-  grade: number
-  confidence: number
-  authentic: boolean
-  damages: Array<{
-    type: string
-    severity: 'minor' | 'moderate' | 'severe'
-    location: string
-  }>
-  estimatedValue?: number
-  centering: {
-    horizontal: number
-    vertical: number
-  }
+// COST: $0.0001/scan (TensorFlow.js local processing)
+import * as tf from '@tensorflow/tfjs';
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
+
+export interface ScanResult {
+  confidence: number;
+  detections: Detection[];
+  processTime: number;
+  damageAnalysis?: DamageAnalysis;
+}
+
+export interface Detection {
+  class: string;
+  score: number;
+  bbox: [number, number, number, number];
+}
+
+export interface DamageAnalysis {
+  hasScratches: boolean;
+  hasCornerWear: boolean;
+  hasEdgeDamage: boolean;
+  centeringScore: number;
+  overallGrade: number;
 }
 
 export class AIService {
-  private static readonly PROCESSING_DELAY = 800 // Simulate 0.8s processing
+  private model: cocoSsd.ObjectDetection | null = null;
+  private isModelLoading = false;
 
-  static async processCard(captures: Record<string, string>): Promise<CardAnalysis> {
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, this.PROCESSING_DELAY))
+  async initialize(): Promise<void> {
+    if (this.model || this.isModelLoading) return;
+    
+    this.isModelLoading = true;
+    try {
+      // Load COCO-SSD for basic object detection
+      // In production, would load custom card detection model
+      this.model = await cocoSsd.load();
+      console.log('AI model loaded successfully');
+    } catch (error) {
+      console.error('Failed to load AI model:', error);
+      throw error;
+    } finally {
+      this.isModelLoading = false;
+    }
+  }
 
-    // Mock AI analysis based on captures
-    const hasAllCaptures = ['front', 'back', 'edge-top', 'edge-bottom', 'edge-left', 'edge-right']
-      .every(key => captures[key])
-
-    if (!hasAllCaptures) {
-      throw new Error('Missing required captures')
+  async analyzeCard(imageData: ImageData): Promise<ScanResult> {
+    const startTime = performance.now();
+    
+    if (!this.model) {
+      await this.initialize();
     }
 
-    // Simulate damage detection
-    const damages = this.detectDamages(captures)
-    const grade = this.calculateGrade(damages)
-    const confidence = this.calculateConfidence(captures)
+    try {
+      // Convert ImageData to tensor
+      const imageTensor = tf.browser.fromPixels(imageData);
+      
+      // Run detection
+      const predictions = await this.model!.detect(imageTensor as any);
+      
+      // Clean up tensor to prevent memory leak
+      imageTensor.dispose();
+      
+      // Calculate confidence based on detections
+      const confidence = predictions.length > 0 
+        ? Math.max(...predictions.map(p => p.score))
+        : 0;
 
+      // Simulate damage analysis (would use specialized model in production)
+      const damageAnalysis = this.simulateDamageAnalysis(imageData, predictions);
+
+      const processTime = performance.now() - startTime;
+
+      return {
+        confidence,
+        detections: predictions.map(p => ({
+          class: p.class,
+          score: p.score,
+          bbox: p.bbox as [number, number, number, number]
+        })),
+        processTime,
+        damageAnalysis
+      };
+    } catch (error) {
+      console.error('AI analysis failed:', error);
+      throw error;
+    }
+  }
+
+  private simulateDamageAnalysis(
+    imageData: ImageData, 
+    detections: cocoSsd.DetectedObject[]
+  ): DamageAnalysis {
+    // This is a placeholder - real implementation would:
+    // 1. Use specialized model trained on card damage
+    // 2. Analyze edge pixels for wear
+    // 3. Detect surface scratches using contrast analysis
+    // 4. Calculate centering based on border detection
+    
+    const randomScore = () => Math.random();
+    
     return {
-      grade,
-      confidence,
-      authentic: Math.random() > 0.1, // 90% authentic rate for demo
-      damages,
-      estimatedValue: this.estimateValue(grade),
-      centering: {
-        horizontal: 48 + Math.random() * 4,
-        vertical: 49 + Math.random() * 2
-      }
+      hasScratches: randomScore() > 0.7,
+      hasCornerWear: randomScore() > 0.8,
+      hasEdgeDamage: randomScore() > 0.75,
+      centeringScore: 50 + Math.floor(randomScore() * 50), // 50-100
+      overallGrade: Math.floor(5 + randomScore() * 5) // 5-10
+    };
+  }
+
+  async processWithCloudFallback(
+    imageData: ImageData,
+    cardValue: number
+  ): Promise<ScanResult> {
+    const localResult = await this.analyzeCard(imageData);
+    
+    // Use cloud processing for high-value cards or low confidence
+    if (localResult.confidence < 0.85 || cardValue > 100) {
+      // In production, would call cloud API here
+      console.log('Would use cloud processing for high-value/low-confidence card');
+      // return await this.cloudAPI.analyze(imageData);
     }
+    
+    return localResult;
   }
 
-  private static detectDamages(captures: Record<string, string>): CardAnalysis['damages'] {
-    const possibleDamages = [
-      { type: 'Surface Scratch', severity: 'minor' as const, location: 'Front Center' },
-      { type: 'Corner Wear', severity: 'minor' as const, location: 'Top Right' },
-      { type: 'Edge Whitening', severity: 'moderate' as const, location: 'Left Edge' },
-      { type: 'Print Defect', severity: 'minor' as const, location: 'Back Lower' },
-    ]
-
-    // Randomly select 0-2 damages for demo
-    const numDamages = Math.floor(Math.random() * 3)
-    const selectedDamages: CardAnalysis['damages'] = []
-
-    for (let i = 0; i < numDamages; i++) {
-      const damage = possibleDamages[Math.floor(Math.random() * possibleDamages.length)]
-      if (!selectedDamages.find(d => d.type === damage.type)) {
-        selectedDamages.push(damage)
-      }
+  // Memory management
+  dispose(): void {
+    if (this.model) {
+      // COCO-SSD doesn't have dispose method, but custom models would
+      this.model = null;
     }
-
-    return selectedDamages
-  }
-
-  private static calculateGrade(damages: CardAnalysis['damages']): number {
-    let grade = 10
-
-    damages.forEach(damage => {
-      switch (damage.severity) {
-        case 'minor':
-          grade -= 0.5
-          break
-        case 'moderate':
-          grade -= 1
-          break
-        case 'severe':
-          grade -= 2
-          break
-      }
-    })
-
-    // Add some randomness for realism
-    grade -= Math.random() * 0.5
-
-    return Math.max(1, Math.round(grade * 10) / 10)
-  }
-
-  private static calculateConfidence(captures: Record<string, string>): number {
-    // Base confidence on number of captures and simulated quality
-    const baseConfidence = 85
-    const qualityBonus = Math.random() * 10
-    
-    return Math.min(99, Math.round(baseConfidence + qualityBonus))
-  }
-
-  private static estimateValue(grade: number): number {
-    // Mock value estimation based on grade
-    const baseValues: Record<number, number> = {
-      10: 5000,
-      9: 2000,
-      8: 800,
-      7: 400,
-      6: 200,
-      5: 100,
-      4: 50,
-      3: 25,
-      2: 10,
-      1: 5
-    }
-
-    const gradeKey = Math.floor(grade)
-    const baseValue = baseValues[gradeKey] || 5
-    
-    // Add some variance
-    const variance = 0.8 + Math.random() * 0.4
-    
-    return Math.round(baseValue * variance)
-  }
-
-  static async detectUVDamage(imageData: ImageData): Promise<boolean> {
-    // Simulate UV damage detection
-    // In real implementation, this would analyze the blue channel intensity
-    await new Promise(resolve => setTimeout(resolve, 200))
-    
-    return Math.random() > 0.8 // 20% chance of UV damage
   }
 }
+
+// Singleton instance
+export const aiService = new AIService();

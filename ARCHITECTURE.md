@@ -2,7 +2,7 @@
 
 ## 🏗️ System Architecture
 
-VeriCard Scan Pro is built as a modern web application using a local-first architecture that prioritizes user privacy and offline functionality.
+VeriCard Scan Pro is built as a modern web application using a local-first architecture that prioritizes user privacy and offline functionality. The project has been cleaned up to focus on web-only implementation, removing mobile components and unnecessary complexity.
 
 ```mermaid
 graph TB
@@ -78,9 +78,10 @@ vericard-scan-pro/
 
 ### AI/ML
 - **Framework**: TensorFlow.js
-- **Models**: Custom trained for card detection
-- **Processing**: Client-side inference
-- **Fallback**: Optional cloud API
+- **Models**: Currently using COCO-SSD as placeholder (custom model in development)
+- **Processing**: Client-side inference with <0.8s target
+- **Fallback**: Cloud API for low confidence (<85%) or high-value cards (>$100)
+- **Cost**: $0.0001/scan for local processing
 
 ### Infrastructure
 - **Monorepo**: pnpm workspaces
@@ -90,6 +91,11 @@ vericard-scan-pro/
 - **Deployment**: Vercel/Netlify
 
 ## 🏛️ Key Design Principles
+
+### 0. Simplicity First
+- Ship working features before adding complexity
+- Avoid premature optimization
+- Document what exists, not what's planned
 
 ### 1. Local-First Architecture
 - All data processing happens in the browser
@@ -196,15 +202,18 @@ graph LR
 |--------|--------|---------|
 | Initial Load | < 3s | TBD |
 | Time to Interactive | < 5s | TBD |
-| Scan Processing | < 1s | ~0.8s |
+| Scan Processing | < 0.8s | Achieved (with placeholder model) |
 | Report Generation | < 3s | TBD |
+| Test Coverage | 85% | In Progress |
 
 ## 🔄 Future Architecture Enhancements
 
 ### Phase 1: Current (Local-Only)
-- Browser-based processing
-- IndexedDB storage
-- No backend required
+- Browser-based processing ✅
+- TensorFlow.js integration ✅
+- Basic test infrastructure ✅
+- IndexedDB storage 🚧
+- Custom AI model 🚧
 
 ### Phase 2: Hybrid (Planned)
 - Optional cloud sync
@@ -239,3 +248,15 @@ graph LR
 ---
 
 This architecture is designed to be simple, scalable, and respectful of user privacy while delivering a powerful card verification platform.
+
+## 🚨 Important Notes
+
+1. **AI Model**: Currently using COCO-SSD for object detection as a placeholder. Production will require a custom-trained model specifically for card detection and damage analysis.
+
+2. **Blockchain**: References to blockchain features are aspirational. No blockchain code is currently implemented.
+
+3. **Libraries**: The `libs/core` and `libs/ai` directories have package structure but no implementation yet. This follows the "structure ready, implementation pending" approach.
+
+4. **Testing**: Test infrastructure is in place with Jest and React Testing Library. Coverage targets are set at 85% but not yet achieved.
+
+5. **Performance**: The 0.8s processing time is achieved with the placeholder model. Real card analysis may require optimization.

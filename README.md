@@ -19,10 +19,11 @@ VeriCard Scan Pro is a web-based application for professional card authenticatio
 
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Styling**: Tailwind CSS, Radix UI
-- **AI/ML**: TensorFlow.js
+- **AI/ML**: TensorFlow.js with COCO-SSD (placeholder for custom model)
 - **Camera**: react-webcam
 - **Database**: Dexie.js (IndexedDB)
 - **Payments**: Stripe
+- **Testing**: Jest, React Testing Library
 - **Monorepo**: pnpm workspaces
 
 ## 📦 Project Structure
@@ -33,8 +34,8 @@ vericard-scan-pro/
 │   ├── web/          # Next.js web application
 │   └── api/          # Backend API (placeholder)
 ├── libs/
-│   ├── core/         # Shared business logic
-│   └── ai/           # AI/ML functionality
+│   ├── core/         # Shared business logic (package structure ready)
+│   └── ai/           # AI/ML functionality (package structure ready)
 ├── docs/             # Documentation
 ├── scripts/          # Build and utility scripts
 └── infra/            # Infrastructure configuration
@@ -81,22 +82,28 @@ STRIPE_SECRET_KEY=your_stripe_secret_key
 pnpm dev
 
 # Run tests
-pnpm test
+cd apps/web && npm test
+
+# Run tests with coverage
+cd apps/web && npm run test:coverage
 
 # Lint code
 pnpm lint
 
 # Build for production
 pnpm build
+
+# Validate against project rules
+npm run validate:rules
 ```
 
 ## 📱 Features in Detail
 
 ### Card Verification
-- Real-time AI analysis using TensorFlow.js
-- Multi-angle capture workflow
-- Damage detection and grading assistance
-- Authenticity verification
+- Real-time AI analysis using TensorFlow.js (currently using COCO-SSD as placeholder)
+- Multi-angle capture workflow (implemented in CameraService)
+- Damage detection simulation (production would use specialized model)
+- Confidence scoring with cloud fallback for high-value cards
 
 ### Reporting
 - Professional PDF report generation
@@ -135,14 +142,27 @@ npm start
 - No data leaves the browser unless explicitly synced
 - PCI compliant payment processing via Stripe
 - Secure camera access via HTTPS
+- Cost-controlled processing ($0.0001/scan target)
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+3. Run validation checks (`npm run validate:rules`)
+4. Write tests for new features (85% coverage required)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+## 📝 Current Status
+
+- ✅ Web app structure with Next.js
+- ✅ Basic AI service with TensorFlow.js
+- ✅ Test infrastructure with Jest
+- ✅ Monorepo setup with pnpm workspaces
+- 🚧 Custom card detection model (using COCO-SSD placeholder)
+- 🚧 Production database implementation
+- 🚧 Stripe payment integration
 
 ## 📄 License
 

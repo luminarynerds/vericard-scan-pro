@@ -54,7 +54,7 @@ class RulesValidator {
 
     // In real implementation, would parse coverage report
     // For now, we'll check if jest config has correct threshold
-    const jestConfigPath = path.join(__dirname, '../apps/mobile/jest.config.js');
+    const jestConfigPath = path.join(__dirname, '../apps/web/jest.config.js');
     if (fs.existsSync(jestConfigPath)) {
       const config = fs.readFileSync(jestConfigPath, 'utf8');
       if (!config.includes('branches: 85')) {
@@ -66,7 +66,7 @@ class RulesValidator {
   private async validateCostAnnotations(): Promise<void> {
     console.log('💰 Checking cost annotations...');
     
-    const servicesPath = path.join(__dirname, '../apps/mobile/src/services');
+    const servicesPath = path.join(__dirname, '../apps/web/src/services');
     const files = this.getAllFiles(servicesPath, '.ts');
 
     for (const file of files) {
@@ -92,12 +92,12 @@ class RulesValidator {
     const requiredServices = [
       'CameraService.ts',
       'AIService.ts',
-      'BlockchainService.ts',
+      'BlockchainService.ts', // Future implementation
       'SecurityService.ts',
       'DatabaseService.ts',
     ];
 
-    const servicesPath = path.join(__dirname, '../apps/mobile/src/services');
+    const servicesPath = path.join(__dirname, '../apps/web/src/services');
     
     for (const service of requiredServices) {
       const exists = this.findFile(servicesPath, service);
@@ -107,18 +107,17 @@ class RulesValidator {
     }
 
     // Check for prohibited dependencies
-    const packageJsonPath = path.join(__dirname, '../apps/mobile/package.json');
+    const packageJsonPath = path.join(__dirname, '../apps/web/package.json');
     if (fs.existsSync(packageJsonPath)) {
       const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
       
-      // Check for Expo Camera (prohibited)
-      if (packageJson.dependencies && packageJson.dependencies['expo-camera']) {
-        this.violations.push('Using prohibited Expo Camera - must use react-native-vision-camera');
+      // Check for required dependencies
+      if (packageJson.dependencies && !packageJson.dependencies['react-webcam']) {
+        this.violations.push('Missing required react-webcam for camera functionality');
       }
 
-      // Check for required dependencies
-      if (packageJson.dependencies && !packageJson.dependencies['react-native-vision-camera']) {
-        this.violations.push('Missing required react-native-vision-camera');
+      if (packageJson.dependencies && !packageJson.dependencies['@tensorflow/tfjs']) {
+        this.violations.push('Missing required @tensorflow/tfjs for AI processing');
       }
     }
   }
@@ -135,16 +134,16 @@ class RulesValidator {
     if (securityServicePath && fs.existsSync(securityServicePath)) {
       const content = fs.readFileSync(securityServicePath, 'utf8');
       
-      if (!content.includes('crypto_secretbox_easy')) {
-        this.violations.push('Missing end-to-end encryption implementation');
+      if (!content.includes('crypto') && !content.includes('encrypt')) {
+        this.violations.push('Missing encryption implementation for local storage');
       }
 
-      if (!content.includes('checkJailbreak')) {
-        this.violations.push('Missing jailbreak detection');
+      if (!content.includes('CSP') && !content.includes('Content-Security-Policy')) {
+        this.violations.push('Missing Content Security Policy implementation');
       }
 
-      if (!content.includes('performSecurityWipe')) {
-        this.violations.push('Missing auto-wipe functionality');
+      if (!content.includes('sanitize') && !content.includes('DOMPurify')) {
+        this.violations.push('Missing input sanitization');
       }
     }
   }
@@ -153,7 +152,7 @@ class RulesValidator {
     console.log('⚡ Checking performance targets...');
     
     const constantsPath = this.findFile(
-      path.join(__dirname, '../apps/mobile/src'),
+      path.join(__dirname, '../apps/web/src'),
       'constants/index.ts'
     );
 
