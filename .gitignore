@@ -84,5 +84,10 @@ performance-results/
 .local/
 local-data/
 
+# Random files that keep appearing
+pricing-sources.md
+rich-klein-knowledge.md
+lifecycle.db
+
 # Git worktrees
 worktrees/
