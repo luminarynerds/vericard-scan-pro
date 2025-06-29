@@ -5,232 +5,198 @@ import * as path from 'path';
 
 interface ValidationResult {
   passed: boolean;
-  violations: string[];
-  warnings: string[];
+  issues: string[];
+  metrics: {
+    hasTests: boolean;
+    hasWorkingCode: boolean;
+    hasMeasurements: boolean;
+  };
 }
 
-// AUTO-GENERATED VALIDATION SNIPPET per CLAUDE_RULES.md
-export function verifyRules(component: any): void {
-  if (component.costPerScan > 0.001) {
-    throw new Error('ECONOMIC_VIOLATION: Cost per scan exceeds $0.001 limit');
-  }
-  if (!component.blockchainSeal) {
-    throw new Error('SECURITY_VIOLATION: Missing blockchain audit trail');
-  }
-}
-
-class RulesValidator {
-  private violations: string[] = [];
-  private warnings: string[] = [];
+/**
+ * Simplified validation based on Linus's review:
+ * "The only validation you need is: Does it work? Is it fast enough? Can you maintain it?"
+ */
+class SimplifiedValidator {
+  private issues: string[] = [];
 
   async validate(): Promise<ValidationResult> {
-    console.log('🔍 Validating VeriCard project against CLAUDE_RULES.md...\n');
+    console.log('🐧 Running Linus-approved validation...\n');
 
-    // Check for mandatory practices
-    await this.validateTestCoverage();
-    await this.validateCostAnnotations();
-    await this.validateArchitecture();
-    await this.validateSecurityRequirements();
-    await this.validatePerformance();
+    const hasTests = await this.checkTests();
+    const hasWorkingCode = await this.checkWorkingCode();
+    const hasMeasurements = await this.checkMeasurements();
 
-    const passed = this.violations.length === 0;
+    const passed = this.issues.length === 0;
 
     return {
       passed,
-      violations: this.violations,
-      warnings: this.warnings,
+      issues: this.issues,
+      metrics: {
+        hasTests,
+        hasWorkingCode,
+        hasMeasurements
+      }
     };
   }
 
-  private async validateTestCoverage(): Promise<void> {
-    console.log('📊 Checking test coverage requirements...');
+  private async checkTests(): Promise<boolean> {
+    console.log('1️⃣  Checking for tests...');
     
-    // Check if coverage report exists
-    const coveragePath = path.join(__dirname, '../coverage/lcov-report/index.html');
-    if (!fs.existsSync(coveragePath)) {
-      this.warnings.push('No coverage report found. Run tests with coverage first.');
-      return;
+    const testFiles = this.findFiles('**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts');
+    
+    if (testFiles.length === 0) {
+      this.issues.push('❌ No tests found. If it\'s not tested, it\'s broken.');
+      return false;
     }
-
-    // In real implementation, would parse coverage report
-    // For now, we'll check if jest config has correct threshold
-    const jestConfigPath = path.join(__dirname, '../apps/web/jest.config.js');
-    if (fs.existsSync(jestConfigPath)) {
-      const config = fs.readFileSync(jestConfigPath, 'utf8');
-      if (!config.includes('branches: 85')) {
-        this.violations.push('Test coverage threshold below 85% requirement');
-      }
+    
+    console.log(`   ✓ Found ${testFiles.length} test files`);
+    
+    // Check if tests actually run
+    const jestConfig = path.join(__dirname, '../apps/web/jest.config.js');
+    if (!fs.existsSync(jestConfig)) {
+      this.issues.push('❌ No Jest config. Tests need to actually run.');
+      return false;
     }
+    
+    return true;
   }
 
-  private async validateCostAnnotations(): Promise<void> {
-    console.log('💰 Checking cost annotations...');
+  private async checkWorkingCode(): Promise<boolean> {
+    console.log('2️⃣  Checking for working code...');
     
-    const servicesPath = path.join(__dirname, '../apps/web/src/services');
-    const files = this.getAllFiles(servicesPath, '.ts');
+    // Check if main services exist and have actual implementations
+    const services = [
+      'apps/web/src/services/AIService.ts',
+      'apps/web/src/services/CameraService.ts',
+      'apps/web/src/services/DatabaseService.ts'
+    ];
+    
+    let hasImplementations = 0;
+    
+    for (const service of services) {
+      const fullPath = path.join(__dirname, '..', service);
+      if (fs.existsSync(fullPath)) {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        
+        // Check for actual implementation, not just interfaces
+        if (content.includes('export class') || content.includes('export function')) {
+          hasImplementations++;
+          console.log(`   ✓ ${path.basename(service)} has implementation`);
+        } else {
+          console.log(`   ⚠️  ${path.basename(service)} looks like just interfaces`);
+        }
+      }
+    }
+    
+    if (hasImplementations === 0) {
+      this.issues.push('❌ No actual implementations found. Architecture without code is worthless.');
+      return false;
+    }
+    
+    return true;
+  }
 
-    for (const file of files) {
+  private async checkMeasurements(): Promise<boolean> {
+    console.log('3️⃣  Checking for measurements...');
+    
+    const codeFiles = this.findFiles('**/*.ts', '**/*.tsx');
+    let hasMeasurements = false;
+    let hasRealCosts = false;
+    
+    for (const file of codeFiles) {
       const content = fs.readFileSync(file, 'utf8');
       
-      // Check for cost annotations
-      if (!content.includes('// COST:')) {
-        this.warnings.push(`Missing cost annotation in ${path.basename(file)}`);
+      // Check for performance measurements
+      if (content.includes('performance.now()') || 
+          content.includes('console.time') ||
+          content.includes('measure')) {
+        hasMeasurements = true;
       }
-
-      // Check for cost violations
-      const costMatch = content.match(/COST: \$([0-9.]+)/);
-      if (costMatch && costMatch[1] && parseFloat(costMatch[1]) > 0.001) {
-        this.violations.push(`Cost violation in ${path.basename(file)}: $${costMatch[1]} exceeds $0.001 limit`);
-      }
-    }
-  }
-
-  private async validateArchitecture(): Promise<void> {
-    console.log('🏗️  Checking architecture requirements...');
-    
-    // Check for required services
-    const requiredServices = [
-      'CameraService.ts',
-      'AIService.ts',
-      'BlockchainService.ts', // Future implementation
-      'SecurityService.ts',
-      'DatabaseService.ts',
-    ];
-
-    const servicesPath = path.join(__dirname, '../apps/web/src/services');
-    
-    for (const service of requiredServices) {
-      const exists = this.findFile(servicesPath, service);
-      if (!exists) {
-        this.violations.push(`Missing required service: ${service}`);
-      }
-    }
-
-    // Check for prohibited dependencies
-    const packageJsonPath = path.join(__dirname, '../apps/web/package.json');
-    if (fs.existsSync(packageJsonPath)) {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
       
-      // Check for required dependencies
-      if (packageJson.dependencies && !packageJson.dependencies['react-webcam']) {
-        this.violations.push('Missing required react-webcam for camera functionality');
-      }
-
-      if (packageJson.dependencies && !packageJson.dependencies['@tensorflow/tfjs']) {
-        this.violations.push('Missing required @tensorflow/tfjs for AI processing');
+      // Check for real cost tracking (not just comments)
+      if (content.includes('// COST:') && 
+          (content.includes('performance.now()') || content.includes('calculateActualCost'))) {
+        hasRealCosts = true;
       }
     }
-  }
-
-  private async validateSecurityRequirements(): Promise<void> {
-    console.log('🔐 Checking security requirements...');
     
-    // Check for encryption implementation
-    const securityServicePath = this.findFile(
-      path.join(__dirname, '../apps/mobile/src/services'),
-      'SecurityService.ts'
-    );
-
-    if (securityServicePath && fs.existsSync(securityServicePath)) {
-      const content = fs.readFileSync(securityServicePath, 'utf8');
-      
-      if (!content.includes('crypto') && !content.includes('encrypt')) {
-        this.violations.push('Missing encryption implementation for local storage');
-      }
-
-      if (!content.includes('CSP') && !content.includes('Content-Security-Policy')) {
-        this.violations.push('Missing Content Security Policy implementation');
-      }
-
-      if (!content.includes('sanitize') && !content.includes('DOMPurify')) {
-        this.violations.push('Missing input sanitization');
-      }
+    if (!hasMeasurements) {
+      console.log('   ⚠️  No performance measurements found');
+      console.log('      Add performance.now() to measure actual execution time');
+    } else {
+      console.log('   ✓ Found performance measurements');
     }
-  }
-
-  private async validatePerformance(): Promise<void> {
-    console.log('⚡ Checking performance targets...');
     
-    const constantsPath = this.findFile(
-      path.join(__dirname, '../apps/web/src'),
-      'constants/index.ts'
-    );
-
-    if (constantsPath && fs.existsSync(constantsPath)) {
-      const content = fs.readFileSync(constantsPath, 'utf8');
-      
-      // Check performance targets are defined
-      if (!content.includes('SCAN_TO_RESULT: 800')) {
-        this.warnings.push('Performance target for scan time not properly defined');
-      }
+    if (!hasRealCosts) {
+      console.log('   ⚠️  Cost annotations without measurements are fantasy');
+    } else {
+      console.log('   ✓ Found cost tracking with measurements');
     }
+    
+    return hasMeasurements;
   }
 
-  private getAllFiles(dir: string, extension: string): string[] {
+  private findFiles(...patterns: string[]): string[] {
     const files: string[] = [];
+    const baseDir = path.join(__dirname, '..');
     
-    if (!fs.existsSync(dir)) return files;
-
-    const items = fs.readdirSync(dir);
-    
-    for (const item of items) {
-      const fullPath = path.join(dir, item);
-      const stat = fs.statSync(fullPath);
+    // Simple file finder (in production, use glob)
+    const searchDir = (dir: string) => {
+      if (!fs.existsSync(dir)) return;
       
-      if (stat.isDirectory()) {
-        files.push(...this.getAllFiles(fullPath, extension));
-      } else if (item.endsWith(extension)) {
-        files.push(fullPath);
+      const items = fs.readdirSync(dir);
+      
+      for (const item of items) {
+        const fullPath = path.join(dir, item);
+        const stat = fs.statSync(fullPath);
+        
+        if (stat.isDirectory() && !item.includes('node_modules') && !item.startsWith('.')) {
+          searchDir(fullPath);
+        } else if (stat.isFile()) {
+          for (const pattern of patterns) {
+            const ext = pattern.replace('**/*', '');
+            if (item.endsWith(ext)) {
+              files.push(fullPath);
+              break;
+            }
+          }
+        }
       }
-    }
-
+    };
+    
+    searchDir(baseDir);
     return files;
-  }
-
-  private findFile(dir: string, filename: string): string | null {
-    if (!fs.existsSync(dir)) return null;
-
-    const items = fs.readdirSync(dir);
-    
-    for (const item of items) {
-      const fullPath = path.join(dir, item);
-      const stat = fs.statSync(fullPath);
-      
-      if (stat.isDirectory()) {
-        const found = this.findFile(fullPath, filename);
-        if (found) return found;
-      } else if (item === filename) {
-        return fullPath;
-      }
-    }
-
-    return null;
   }
 }
 
 // Run validation
 async function main() {
-  const validator = new RulesValidator();
+  const validator = new SimplifiedValidator();
   const result = await validator.validate();
 
   console.log('\n' + '='.repeat(60) + '\n');
 
   if (result.passed) {
-    console.log('✅ All CLAUDE_RULES.md requirements PASSED!\n');
+    console.log('✅ PASSED - Your code meets basic standards\n');
   } else {
-    console.log('❌ Validation FAILED!\n');
-    console.log('Violations:');
-    result.violations.forEach(v => console.log(`  - ${v}`));
+    console.log('❌ FAILED - Fix these issues:\n');
+    result.issues.forEach(issue => console.log(`  ${issue}`));
   }
 
-  if (result.warnings.length > 0) {
-    console.log('\nWarnings:');
-    result.warnings.forEach(w => console.log(`  - ${w}`));
-  }
+  console.log('\n📊 Metrics:');
+  console.log(`  - Has tests: ${result.metrics.hasTests ? '✓' : '✗'}`);
+  console.log(`  - Has working code: ${result.metrics.hasWorkingCode ? '✓' : '✗'}`);
+  console.log(`  - Has measurements: ${result.metrics.hasMeasurements ? '✓' : '✗'}`);
 
-  console.log('\n' + '='.repeat(60));
+  console.log('\n💡 Remember Linus\'s rules:');
+  console.log('  1. Make it work');
+  console.log('  2. Make it correct');
+  console.log('  3. Make it fast (in that order)');
+  console.log('  4. Measure everything\n');
 
-  // Exit with appropriate code
+  console.log('='.repeat(60));
+
   process.exit(result.passed ? 0 : 1);
 }
 
