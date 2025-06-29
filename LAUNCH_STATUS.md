@@ -2,65 +2,45 @@
 
 ## ✅ Completed Setup
 1. **Dependencies Installed**: All npm packages installed successfully
-2. **OpenCV Issue Fixed**: Removed broken react-native-opencv3 package
-3. **Environment Config**: Created .env file with development settings
-4. **Metro Bundler**: Running on port 8082
-5. **CocoaPods**: Installed (v1.16.2)
+2. **Environment Config**: Created .env file with development settings
+3. **Next.js Web App**: Ready to run on port 3000
+4. **TypeScript**: Configured with strict type checking
+5. **TailwindCSS**: Styling framework configured
 
-## ❌ iOS Launch Blocked
-**Reason**: Xcode is not installed on your system.
-
-To launch on iOS, you need to:
-1. Install Xcode from Mac App Store (12GB download)
-2. Open Xcode and accept license agreements
-3. Install iOS simulators
-4. Run: `cd apps/mobile/ios && pod install`
-5. Run: `npx react-native run-ios --port=8082`
-
-## 🤖 Alternative: Android Setup
-To launch on Android instead:
+## 🌐 Web App Launch
+To launch the web application:
 ```bash
-# Install prerequisites
-brew install --cask android-studio
-brew install openjdk@17
+# Terminal 1: Start development server
+cd /Users/sam/projects/vericard-scan-pro/apps/web
+npm run dev
 
-# Set environment variables (add to ~/.zshrc)
-export JAVA_HOME=/opt/homebrew/opt/openjdk@17
-export ANDROID_HOME=$HOME/Library/Android/sdk
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-export PATH=$PATH:$ANDROID_HOME/emulator
-
-# Run Android Studio, install SDK
-# Create AVD (Android Virtual Device)
-# Launch app
-cd apps/mobile
-npx react-native run-android --port=8082
+# Open browser to http://localhost:3000
 ```
 
 ## 📱 App Features Ready
-- ✅ UV filter simulation (using image filters)
+- ✅ Web-based camera capture (react-webcam)
 - ✅ Multi-angle capture workflow
-- ✅ Damage detection AI pipeline
+- ✅ Damage detection AI pipeline (TensorFlow.js)
 - ✅ Theft prevention protocols
 - ✅ Report generation (PSA/eBay/Topps)
 - ✅ Commission calculator
 - ✅ Subscription tiers ($49/$149)
-- ✅ Local-first architecture
+- ✅ Local-first architecture (Dexie.js)
 
 ## ⚠️ Pending Tasks
 1. **Backend API**: Not implemented (app works offline)
 2. **Stripe Webhooks**: Requires backend
-3. **Production Build**: Needs signing certificates
+3. **Production Build**: Configure for deployment
 4. **Database Migrations**: Manual setup required
 
-## 🚀 Quick Start (when Xcode is installed)
+## 🚀 Quick Start
 ```bash
-# Terminal 1: Start Metro
-cd /Users/sam/projects/vericard-scan-pro/apps/mobile
-npx react-native start --port=8082
+# Install dependencies (if needed)
+pnpm install
 
-# Terminal 2: Launch iOS app
-npx react-native run-ios --port=8082
+# Start the web app
+cd apps/web
+npm run dev
 ```
 
 The app is fully functional in local-first mode. Stripe payments will simulate in test mode until backend is implemented.

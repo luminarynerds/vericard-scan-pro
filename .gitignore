@@ -37,16 +37,9 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 
-# Expo
-.expo/
-.expo-shared/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
+# Next.js
+.next/
+out/
 
 # TypeScript
 *.tsbuildinfo
@@ -90,3 +83,6 @@ performance-results/
 # Local development
 .local/
 local-data/
+
+# Git worktrees
+worktrees/

@@ -2,16 +2,10 @@
 
 ## Prerequisites
 
-### For iOS (macOS only)
-1. **Xcode** - Install from Mac App Store
-2. **CocoaPods** - Install with: `gem install cocoapods`
-3. **iOS Simulator** - Comes with Xcode
-
-### For Android
-1. **Android Studio** - Download from [developer.android.com](https://developer.android.com/studio)
-2. **Android SDK** - Install via Android Studio
-3. **Java JDK 11+** - Install via Homebrew: `brew install openjdk@11`
-4. **Android Emulator** or physical device with USB debugging enabled
+### For Web Development
+1. **Node.js 18+** - Install from [nodejs.org](https://nodejs.org/)
+2. **pnpm** - Install with: `npm install -g pnpm`
+3. **Modern Browser** - Chrome/Firefox/Safari with camera support
 
 ## 🎯 Quick Launch
 
@@ -21,92 +15,68 @@ cd /Users/sam/projects/vericard-scan-pro
 pnpm install
 ```
 
-### Step 2: iOS Setup (macOS only)
+### Step 2: Start Development Server
 ```bash
-cd apps/mobile/ios
-pod install
-cd ..
+cd apps/web
+npm run dev
 ```
 
-### Step 3: Start Metro Bundler
-```bash
-# In terminal 1
-cd apps/mobile
-npx react-native start
-```
-
-### Step 4: Launch the App
-
-#### For iOS Simulator:
-```bash
-# In terminal 2
-cd apps/mobile
-npx react-native run-ios
-```
-
-#### For Android Emulator:
-```bash
-# In terminal 2
-cd apps/mobile
-npx react-native run-android
-```
+### Step 3: Open in Browser
+Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## 📱 Features You'll See
 
 1. **Welcome Screen** - VeriCard logo and feature highlights
-2. **Camera Scanner** - AI-powered card verification
-3. **UV Filter** - 95% hidden damage detection
+2. **Camera Scanner** - AI-powered card verification (TensorFlow.js)
+3. **Multi-angle Capture** - Comprehensive card analysis
 4. **Reports** - PSA/eBay/Topps format generation
 5. **Subscription Tiers** - Basic ($49) and Pro ($149)
 
 ## 🔧 Troubleshooting
 
-### iOS Issues
-- **"pod: command not found"** → Install CocoaPods: `gem install cocoapods`
-- **"No simulator found"** → Open Xcode > Window > Devices and Simulators
-- **Build errors** → Clean build: `cd ios && rm -rf Pods && pod install`
+### Common Issues
+- **"Port 3000 in use"** → Kill the process: `lsof -ti:3000 | xargs kill -9`
+- **Camera not working** → Ensure HTTPS or localhost (camera requires secure context)
+- **Build errors** → Clear cache: `rm -rf .next && npm run dev`
 
-### Android Issues
-- **"SDK not found"** → Set ANDROID_HOME in ~/.zshrc:
-  ```bash
-  export ANDROID_HOME=$HOME/Library/Android/sdk
-  export PATH=$PATH:$ANDROID_HOME/emulator
-  export PATH=$PATH:$ANDROID_HOME/tools
-  export PATH=$PATH:$ANDROID_HOME/tools/bin
-  export PATH=$PATH:$ANDROID_HOME/platform-tools
-  ```
-- **"No emulator found"** → Start Android Studio > AVD Manager > Create Virtual Device
-
-### Metro Bundler Issues
-- **Port 8081 in use** → Kill the process: `lsof -ti:8081 | xargs kill -9`
-- **Cache issues** → Reset cache: `npx react-native start --reset-cache`
+### Environment Setup
+Create `.env.local` file in `apps/web`:
+```env
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_key
+STRIPE_SECRET_KEY=your_stripe_secret
+```
 
 ## 🎨 Development Mode
 
-The app will launch in development mode with:
-- Hot reload enabled
-- Debug menu (shake device or Cmd+D on iOS, Cmd+M on Android)
-- Console logs visible in Metro terminal
+The app runs in development mode with:
+- Fast refresh enabled
+- Error overlay for debugging
+- Source maps for debugging
+- Console logs visible in browser DevTools
 
 ## 📦 Building for Production
 
-### iOS
+### Build the app
 ```bash
-cd ios
-xcodebuild -workspace VeriCardScanPro.xcworkspace -scheme VeriCardScanPro -configuration Release
+cd apps/web
+npm run build
 ```
 
-### Android
+### Start production server
 ```bash
-cd android
-./gradlew assembleRelease
+npm start
+```
+
+### Deploy to Vercel (recommended)
+```bash
+npx vercel
 ```
 
 ## 🔐 Important Notes
 
 - The app requires camera permissions for scanning
-- UV filter feature requires device with appropriate camera capabilities
-- Stripe integration requires test keys for development (already configured)
+- Browser must support WebRTC for camera access
+- Stripe integration requires test keys for development
 - Local-first architecture means full functionality even offline
 
 ## 🚨 Current Status
@@ -114,7 +84,7 @@ cd android
 ✅ Phase 1: Foundation - Complete
 ✅ Phase 2: Core Features - Complete  
 ✅ Phase 3: Monetization - Complete
-🎯 Ready for launch!
+🎯 Ready for deployment!
 
 ## 💰 Revenue Features
 
